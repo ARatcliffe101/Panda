@@ -1,0 +1,189 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PANDA - PDF Watermarker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header>
+      <img id="brandLogo" src="logo.png" alt="PANDA logo" onerror="this.style.display='none'" />
+      <h1>PANDA</h1>
+      <p><strong>Protection And Native Digital Authentication</strong></p>
+      <p>Browser-only PDF watermarking tool. No backend required.</p>
+    </header>
+
+    <section class="panel upload-panel">
+      <label for="pdfInput">1) Upload PDF</label>
+      <input id="pdfInput" type="file" accept="application/pdf" />
+      <div id="fileMeta" class="muted">No file selected.</div>
+    </section>
+
+    <section class="panel controls-grid">
+      <div class="toggles-card">
+        <label class="toggle-line"><input id="toggleAll" type="checkbox" checked /> Enable watermarking</label>
+        <label class="toggle-line"><input id="toggleText" type="checkbox" checked /> Allow Text mode</label>
+        <label class="toggle-line"><input id="toggleImage" type="checkbox" checked /> Allow Image mode (logo/photo)</label>
+        <label class="toggle-line"><input id="toggleDynamic" type="checkbox" checked /> Allow Dynamic mode (name/email/date)</label>
+        <label class="toggle-line"><input id="toggleStamp" type="checkbox" checked /> Allow Stamp mode/presets</label>
+        <div id="toggleState" class="muted small"></div>
+      </div>
+
+      <div>
+        <label for="mode">2) Watermark Type</label>
+        <select id="mode">
+          <option value="text">Text Watermark</option>
+          <option value="image">Image Watermark</option>
+          <option value="dynamic">Dynamic Watermark</option>
+          <option value="stamp">Stamp</option>
+        </select>
+      </div>
+
+      <div id="textControls">
+        <label for="text">Text</label>
+        <input id="text" type="text" value="CONFIDENTIAL" />
+      </div>
+
+      <div id="dynamicControls" class="hidden">
+        <label for="dynamicTemplate">Template</label>
+        <input id="dynamicTemplate" type="text" value="Viewed by {name} | {email} | {datetime}" />
+        <div class="inline-2">
+          <input id="dynamicName" type="text" placeholder="Name" />
+          <input id="dynamicEmail" type="text" placeholder="Email" />
+        </div>
+      </div>
+
+      <div id="imageControls" class="hidden">
+        <label for="imageInput">Image / Logo</label>
+        <input id="imageInput" type="file" accept="image/png,image/jpeg" />
+      </div>
+
+      <div>
+        <label for="stampPreset">Stamp Preset</label>
+        <select id="stampPreset">
+          <option>APPROVED</option>
+          <option>SIGN HERE</option>
+          <option>REJECTED</option>
+          <option>PAID</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="style">Text Style</label>
+        <select id="style">
+          <option value="standard">Standard</option>
+          <option value="stylized">Stylized</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="opacity">Opacity: <span id="opacityValue">20%</span></label>
+        <input id="opacity" type="range" min="10" max="30" value="20" />
+      </div>
+
+      <div>
+        <label for="size">Size</label>
+        <input id="size" type="number" min="8" max="240" value="56" />
+      </div>
+
+      <div>
+        <label for="rotation">Rotation (deg)</label>
+        <input id="rotation" type="number" min="-180" max="180" value="-35" />
+      </div>
+
+      <div>
+        <label for="position">Position</label>
+        <select id="position">
+          <option value="center">Center</option>
+          <option value="top-left">Top Left</option>
+          <option value="top-center">Top Center</option>
+          <option value="top-right">Top Right</option>
+          <option value="middle-left">Middle Left</option>
+          <option value="middle-right">Middle Right</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="bottom-center">Bottom Center</option>
+          <option value="bottom-right">Bottom Right</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+
+      <div class="inline-2">
+        <div>
+          <label for="offsetX">Offset X (px)</label>
+          <input id="offsetX" type="number" value="0" />
+        </div>
+        <div>
+          <label for="offsetY">Offset Y (px)</label>
+          <input id="offsetY" type="number" value="0" />
+        </div>
+      </div>
+
+      <div>
+        <label class="toggle-line"><input id="repeat" type="checkbox" /> Repeat watermark across page</label>
+      </div>
+
+      <div class="inline-2">
+        <div>
+          <label for="repeatGapX">Repeat Gap X (px)</label>
+          <input id="repeatGapX" type="number" min="0" value="140" />
+        </div>
+        <div>
+          <label for="repeatGapY">Repeat Gap Y (px)</label>
+          <input id="repeatGapY" type="number" min="0" value="120" />
+        </div>
+      </div>
+
+      <div>
+        <label for="layer">Layering</label>
+        <select id="layer">
+          <option value="above">On Top</option>
+          <option value="below">Behind (Preview-only visual)</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="pageTarget">Pages</label>
+        <select id="pageTarget">
+          <option value="all">All pages</option>
+          <option value="front">Front page only</option>
+          <option value="back">Back page only</option>
+          <option value="front-back">Front and back only</option>
+          <option value="custom">Custom page range</option>
+        </select>
+      </div>
+
+      <div id="pageRangeWrap" class="hidden">
+        <label for="pageRange">Custom Page Range</label>
+        <input id="pageRange" type="text" placeholder="e.g. 1,3-5,8 or odd/even" value="1" />
+      </div>
+    </section>
+
+    <section class="panel preview-panel">
+      <div class="preview-head">
+        <strong>Preview</strong>
+        <div class="preview-nav">
+          <button type="button" id="previewPrev" class="ghost">Prev</button>
+          <span id="previewMeta" class="muted">No preview yet</span>
+          <button type="button" id="previewNext" class="ghost">Next</button>
+        </div>
+      </div>
+      <canvas id="previewCanvas" width="760" height="540"></canvas>
+    </section>
+
+    <section class="panel actions">
+      <button id="applyBtn">3) Generate Watermarked PDF</button>
+      <a id="downloadLink" class="hidden" download="panda-watermarked.pdf">Download Result</a>
+      <p class="note">Note: PDF drawing APIs place watermarks above content. "Behind" is shown for preview behavior only.</p>
+      <div id="status" class="muted"></div>
+    </section>
+  </main>
+</body>
+</html>
